@@ -1,0 +1,18 @@
+# Generated installers, feeds and previews
+*.zip
+*.sha256
+**/dist/
+**/previews/
+**/updates/
+**/updatesxml/
+
+# Documentation and shop copy remain outside this source repository
+*.md
+**/docs/
+/documentation.html
+/product.htm
+
+# Local files
+__pycache__/
+*.pyc
+.DS_Store

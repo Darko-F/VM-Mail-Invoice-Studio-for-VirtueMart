@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><form>
+<fieldset name="branding" label="COM_VMMAILINVOICESTUDIO_BRANDING">
+<field name="brand" type="text" label="COM_VMMAILINVOICESTUDIO_BRAND" description="COM_VMMAILINVOICESTUDIO_BRAND_DESC" maxlength="200" filter="string"/>
+<field name="accent" type="color" label="COM_VMMAILINVOICESTUDIO_ACCENT" default="#147d73" format="hex" filter="string"/>
+<field name="logo" type="media" label="COM_VMMAILINVOICESTUDIO_LOGO" description="COM_VMMAILINVOICESTUDIO_LOGO_DESC" directory="images" types="images" filter="string"/>
+</fieldset><fieldset name="email" label="COM_VMMAILINVOICESTUDIO_EMAIL">
+<field name="email_enabled" type="radio" layout="joomla.form.field.radio.switcher" label="COM_VMMAILINVOICESTUDIO_ENABLE" default="0" filter="integer"><option value="0">JNO</option><option value="1">JYES</option></field>
+<field name="email_preset" type="list" label="COM_VMMAILINVOICESTUDIO_PRESET"><option value="classic">Classic</option><option value="modern">Modern</option></field>
+<field name="email_intro" type="textarea" label="COM_VMMAILINVOICESTUDIO_INTRO" rows="3" maxlength="4000" filter="string"/>
+<field name="email_closing" type="textarea" label="COM_VMMAILINVOICESTUDIO_CLOSING" rows="3" maxlength="4000" filter="string"/>
+</fieldset><fieldset name="invoice" label="COM_VMMAILINVOICESTUDIO_INVOICE">
+<field name="invoice_enabled" type="radio" layout="joomla.form.field.radio.switcher" label="COM_VMMAILINVOICESTUDIO_ENABLE" default="0" filter="integer"><option value="0">JNO</option><option value="1">JYES</option></field>
+<field name="invoice_preset" type="list" label="COM_VMMAILINVOICESTUDIO_PRESET"><option value="classic">Classic</option><option value="modern">Modern</option></field>
+<field name="invoice_intro" type="textarea" label="COM_VMMAILINVOICESTUDIO_INTRO" rows="3" maxlength="4000" filter="string"/>
+<field name="invoice_closing" type="textarea" label="COM_VMMAILINVOICESTUDIO_CLOSING" rows="3" maxlength="4000" filter="string"/>
+</fieldset></form>

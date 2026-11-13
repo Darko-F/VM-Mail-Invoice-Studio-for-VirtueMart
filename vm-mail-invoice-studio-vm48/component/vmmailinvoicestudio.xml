@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" method="upgrade">
+<name>COM_VMMAILINVOICESTUDIO</name><author>Darko Fatur / ToPowerYou</author><creationDate>2026-11</creationDate><copyright>Copyright (C) 2026 Darko Fatur / ToPowerYou</copyright><license>GNU General Public License version 2 or later</license><authorEmail>info@topoweryou.com</authorEmail><authorUrl>https://topoweryou.com</authorUrl><version>1.0.0</version>
+<description>COM_VMMAILINVOICESTUDIO_DESCRIPTION</description>
+<namespace path="src">ToPowerYou\Component\Vmmailinvoicestudio</namespace>
+<scriptfile>script.php</scriptfile>
+<administration><menu>COM_VMMAILINVOICESTUDIO</menu><files folder="admin"><folder>services</folder><folder>src</folder><folder>tmpl</folder><folder>forms</folder><folder>presets</folder><folder>fonts</folder><folder>language</folder><filename>access.xml</filename><filename>config.xml</filename></files></administration>
+<media destination="com_vmmailinvoicestudio" folder="media"><filename>studio.css</filename><filename>studio.js</filename><filename>logo.svg</filename></media>
+<updateservers><server type="extension" priority="1" name="VM Mail &amp; Invoice Studio Updates">https://shop.topoweryou.com/files/updatesxml/vmmailinvoicestudio-vm48.xml</server></updateservers>
+</extension>

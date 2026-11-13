@@ -1,0 +1,9 @@
+{
+  "name": "Classic",
+  "accent": "#234b62",
+  "background": "#f2f4f5",
+  "heading_background": "#ffffff",
+  "heading_color": "#234b62",
+  "border": "#d4dce1",
+  "padding": 24
+}

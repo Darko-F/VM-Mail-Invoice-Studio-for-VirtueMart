@@ -1,0 +1,9 @@
+{
+  "name": "Modern",
+  "accent": "#147d73",
+  "background": "#edf4f2",
+  "heading_background": "#147d73",
+  "heading_color": "#ffffff",
+  "border": "#d1e2df",
+  "padding": 32
+}
