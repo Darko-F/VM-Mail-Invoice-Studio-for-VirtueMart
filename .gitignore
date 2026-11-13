@@ -16,3 +16,7 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# Public repository documentation
+!README.md
+!CHANGELOG.md

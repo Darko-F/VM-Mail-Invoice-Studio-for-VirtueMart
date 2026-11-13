@@ -17,7 +17,7 @@ use ToPowerYou\Component\Vmmailinvoicestudio\Administrator\Contract\DesignPackIn
 
 final class DesignCatalog
 {
-    public const CORE_VERSION = '1.0.0';
+    public const CORE_VERSION = '1.0.1';
     public const CONTENT_TOKEN = '{{vmstudio_content}}';
     private static ?self $instance = null;
     private array $designs = [];
@@ -141,8 +141,13 @@ final class DesignCatalog
                     throw new \InvalidArgumentException('Design renderer is not callable.');
                 }
             }
+            $contentRenderer = $design['content_renderer'] ?? null;
+            if ($contentRenderer !== null && !is_callable($contentRenderer)) {
+                throw new \InvalidArgumentException('Invalid content renderer.');
+            }
             $pending[$id] = array_replace($definition, $styles, [
                 'id'=>$id, 'name'=>$design['name'], 'provider'=>$element, 'pack'=>$pack['name'],
+                'content_renderer'=>$contentRenderer,
                 'base'=>$design['base'], 'kinds'=>array_values(array_unique($design['kinds'])), 'renderers'=>$renderers,
             ]);
         }

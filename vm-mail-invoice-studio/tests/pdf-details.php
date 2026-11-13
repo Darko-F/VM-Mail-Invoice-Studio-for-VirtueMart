@@ -118,7 +118,12 @@ namespace {
     require dirname(__DIR__) . '/design-packs/studioexample/src/Extension/Studioexample.php';
     \ToPowerYou\Component\Vmmailinvoicestudio\Administrator\Service\DesignCatalog::current()->register('studioexample',
         (new \ToPowerYou\Plugin\Vmstudiodesign\Studioexample\Extension\Studioexample)->getDesignPack());
-    foreach (['classic', 'modern', 'studioexample.editorial'] as $preset) {
+    require dirname(__DIR__) . '/design-packs/studioinvoicecollection/src/Extension/Studioinvoicecollection.php';
+    $collection = new \ToPowerYou\Plugin\Vmstudiodesign\Studioinvoicecollection\Extension\Studioinvoicecollection;
+    \ToPowerYou\Component\Vmmailinvoicestudio\Administrator\Service\DesignCatalog::current()->register('studioinvoicecollection', $collection->getDesignPack());
+    $collectionIds = array_map(static fn($id) => 'studioinvoicecollection.' . $id, array_keys($collection->getDesignPack()['designs']));
+    foreach (array_merge(['classic', 'modern', 'studioexample.editorial'], $collectionIds) as $preset) {
+        $isCollection = str_starts_with($preset, 'studioinvoicecollection.');
         foreach ([false, true] as $shipping) {
             $view->orderDetails['details']['has_ST'] = $shipping;
             $view->pdf_formatter = new \VirtueMart\VmVendorPDF();
@@ -129,8 +134,9 @@ namespace {
                 check(str_contains($html, 'border-left:5pt solid #24559a'), 'Pack renderer uses the actual VM invoice and saved blue accent');
             }
             check($view->pdf_formatter->getFontFamily() === 'vmsans', 'Real invoice renderer activates Unicode');
-            check(str_contains($html, 'class="vms-details"') && str_contains($html, 'class="vms-addresses"'), 'Native details converted');
-            check(str_contains($html, 'font-size:8.5pt'), 'Compact detail font');
+            check(str_contains($html, 'class="vms-details') && str_contains($html, 'class="vms-addresses"'), 'Native details converted');
+            check(str_contains($html, $isCollection ? 'font-size:9pt' : 'font-size:8.5pt'), 'Compact detail font');
+            if ($isCollection) { check(str_contains($html, 'collection-items'), 'Native invoice uses the collection content renderer'); }
             foreach (['Ajdovščina Čč Šš Žž', 'Črt', 'Žagar', 'Identifier SI-TEST', 'Keep this value', 'customer@example.test', 'Terms preserved', 'Long customer note'] as $value) {
                 check(str_contains($html, $value), 'Content preserved: ' . $value);
             }
@@ -152,11 +158,11 @@ namespace {
                 check(!str_contains($html, 'Shipping Ajdovščina'), 'Modern shipping address hidden');
             }
             $dom = new DOMDocument(); @$dom->loadHTML($html); $xp = new DOMXPath($dom);
-            foreach ($xp->query('//table[@class="vms-details"]/tr[not(@class="vms-addresses")]') as $row) {
+            foreach ($xp->query('//table[contains(concat(" ",@class," ")," vms-details ")]/tr[not(@class="vms-addresses")]') as $row) {
                 check($xp->query('./td', $row)->length === 4, 'Details use four columns');
             }
             if ($preset !== 'classic') {
-                $first = $xp->query('//table[@class="vms-details"]/tr[2]/td');
+                $first = $xp->query('//table[contains(concat(" ",@class," ")," vms-details ")]/tr[2]/td');
                 check(str_contains($first->item(0)->textContent, 'Company') && str_contains($first->item(1)->textContent, 'Test company'), 'Billing occupies the left column');
                 check(str_contains($first->item(2)->textContent, 'Invoice date'), 'Invoice details occupy the right column');
             }
@@ -164,6 +170,15 @@ namespace {
             $view->pdf_formatter->PrintContents($html);
             $path = dirname(__DIR__) . '/previews/invoice-details-' . $preset . ($shipping ? '-shipping' : '') . '.pdf';
             $view->pdf_formatter->Output($path, 'F');
+            file_put_contents(substr($path, 0, -4) . '.html', $html);
+            $lines = [];
+            exec('pdftotext -layout ' . escapeshellarg($path) . ' -', $lines, $code);
+            check($code === 0, 'Native PDF text can be extracted');
+            $text = preg_replace('/\s+/u', ' ', implode("\n", $lines));
+            foreach (['Header: Ajdovščina Čč Šš Žž', 'Footer: Ajdovščina Čč Šš Žž', 'Identifier SI-TEST', 'Keep this value', 'customer@example.test', 'Terms preserved', '19.47 EUR'] as $value) {
+                check(str_contains($text, $value), 'Native PDF retains readable content: ' . $value);
+            }
+
         }
     }
     $unicode = new TCPDF();
@@ -173,5 +188,5 @@ namespace {
     Invoice::preparePdf($unicode);
     check($unicode->getFontFamily() === 'freemono' && $unicode->getFontSizePt() === 11.0, 'Existing Unicode font and size preserved');
     check(Invoice::compact('<h1>Custom</h1><table><tr><td>Custom layout</td></tr></table>') === '<h1>Custom</h1><table><tr><td>Custom layout</td></tr></table>', 'Unknown layout preserved');
-    echo "PASS: native VM5 order layout, real vendor PDF, four columns, both core designs, example pack and shipping variants\n";
+    echo "PASS: native VM5 order layout, real vendor PDF, four columns, both core designs, example/collection packs and shipping variants\n";
 }

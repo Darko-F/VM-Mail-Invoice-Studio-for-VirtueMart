@@ -206,6 +206,15 @@ final class Design
                 $printed = '';
                 ob_start();
                 try {
+                    if (isset($preset['content_renderer'])) {
+                        $styledBody = ($preset['content_renderer'])([
+                            'api'=>1, 'kind'=>$kind, 'pdf'=>$pdf, 'design_id'=>$preset['id'], 'body_html'=>$body,
+                        ]);
+                        if (!is_string($styledBody) || trim($styledBody) === '') {
+                            throw new \UnexpectedValueException('A content renderer must return document HTML.');
+                        }
+                        $body = $styledBody;
+                    }
                     $output = ($preset['renderers'][$kind])([
                         'api'=>1, 'kind'=>$kind, 'pdf'=>$pdf, 'design_id'=>$preset['id'],
                         'heading_html'=>$heading, 'accent'=>$accent, 'background'=>$background,
@@ -259,7 +268,7 @@ final class Design
                 . '<p>SAMPLE ONLY — fictional order, not a tax invoice.</p>';
         }
         $body = '<h1>' . ($kind === 'email' ? 'Order confirmation' : 'Invoice · SAMPLE-001') . '</h1>' . $details
-            . '<table width="100%" border="1" cellspacing="0" cellpadding="8"><tr><th>Item</th><th>Qty</th><th>Total</th></tr><tr><td>Example product</td><td>2</td><td>100.00 EUR</td></tr><tr><td colspan="2">VAT (sample 22%)</td><td>22.00 EUR</td></tr><tr><td colspan="2"><strong>Total</strong></td><td><strong>122.00 EUR</strong></td></tr></table>'
+            . '<table class="html-email" width="100%" border="0" cellspacing="0" cellpadding="6"><tr class="sectiontableheader"><td width="55%">Item</td><td width="10%">Qty</td><td width="17%">Price</td><td width="18%">Total</td></tr><tr><td>Example product</td><td>2</td><td>50.00 EUR</td><td>100.00 EUR</td></tr><tr class="vms-total"><td colspan="3" width="82%">VAT (sample 22%)</td><td width="18%">22.00 EUR</td></tr><tr class="vms-total"><td colspan="3" width="82%"><strong>Total</strong></td><td width="18%"><strong>122.00 EUR</strong></td></tr></table>'
             . '<p>Payment and shipment details, tax breakdowns and terms are provided by VirtueMart in actual documents.</p>';
         return self::frame($body, $kind, $settings, $settings['brand'] ?: 'Your shop', $pdf, $context);
     }

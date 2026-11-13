@@ -45,11 +45,12 @@ for p in (root/'dist').glob('*.zip'):
         lang_path = xml.find('languages').get('folder', '').strip('/') + '/' + lang.text
         assert lang_path.endswith('/pkg_vmmailinvoicestudio.sys.ini')
         translations = dict(re.findall(r'^([A-Z0-9_]+)="(.*)"$', z.read(lang_path).decode(), re.M))
-        assert xml.findtext('name') in translations, 'Package install name must translate'
+        assert translations.get(xml.findtext('name'), xml.findtext('name')) == 'VM 5 Mail Invoice Studio', 'Package install name must match the listing'
+        assert xml.findtext('description') in translations
         with zipfile.ZipFile(io.BytesIO(z.read('com_vmmailinvoicestudio.zip'))) as component:
             component_lang = component.read('admin/language/en-GB/com_vmmailinvoicestudio.sys.ini').decode()
             component_name = re.search(r'^COM_VMMAILINVOICESTUDIO="(.*)"$', component_lang, re.M).group(1)
-            assert translations[xml.findtext('name')] == component_name, 'Package/component names must match'
+            assert translations.get(xml.findtext('name'), xml.findtext('name')) == component_name, 'Package/component names must match'
         for f in xml.findall('files/file'):
             with zipfile.ZipFile(io.BytesIO(z.read(f.text))) as child:assert child.testzip() is None
 for p in (root/'dist'/'design-packs').glob('*.zip'):

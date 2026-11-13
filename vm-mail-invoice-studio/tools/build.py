@@ -32,7 +32,7 @@ sha = hashlib.sha256(package).hexdigest()
 (DIST/(name+'.sha256')).write_text(f'{sha}  {name}\n')
 updates=ET.Element('updates')
 u=ET.SubElement(updates,'update')
-for key,value in [('name','VM 5 Mail Invoice Studio'),('description','Order email and PDF invoice design for VirtueMart 5'),('element','pkg_vmmailinvoicestudio'),('type','package'),('version',VERSION),('client','0')]: ET.SubElement(u,key).text=value
+for key,value in [('name','VM 5 Mail Invoice Studio'),('description','Order email and PDF invoice design for VirtueMart 5'),('element','pkg_vmmailinvoicestudio'),('type','package'),('version',VERSION),('client','site')]: ET.SubElement(u,key).text=value
 ET.SubElement(u,'infourl',{'title':'ToPowerYou'}).text='https://topoweryou.com'
 d=ET.SubElement(u,'downloads')
 ET.SubElement(d,'downloadurl',{'type':'full','format':'zip'}).text=f'https://shop.topoweryou.com/index.php?option=com_vmupdatekeymanager&task=download.get&file={name}&channel=update'

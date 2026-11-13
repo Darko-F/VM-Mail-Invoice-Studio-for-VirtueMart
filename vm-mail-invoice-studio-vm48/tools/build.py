@@ -6,7 +6,7 @@ import hashlib, io, xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / 'dist'
 DIST.mkdir(exist_ok=True)
-VERSION = ET.parse(ROOT/'package/pkg_vmmailinvoicestudio.xml').getroot().findtext('version')
+VERSION = ET.parse(ROOT/'package/pkg_vmmailinvoicestudio_vm48.xml').getroot().findtext('version')
 
 def archive(files):
     output = io.BytesIO()
@@ -32,7 +32,7 @@ sha = hashlib.sha256(package).hexdigest()
 (DIST/(name+'.sha256')).write_text(f'{sha}  {name}\n')
 updates=ET.Element('updates')
 u=ET.SubElement(updates,'update')
-for key,value in [('name','VM 4 Mail Invoice Studio'),('description','Order email and PDF invoice design for VirtueMart 4.2.6–4.8'),('element','pkg_vmmailinvoicestudio'),('type','package'),('version',VERSION),('client','0')]: ET.SubElement(u,key).text=value
+for key,value in [('name','VM 4 Mail Invoice Studio'),('description','Order email and PDF invoice design for VirtueMart 4.2.6–4.8'),('element','pkg_vmmailinvoicestudio_vm48'),('type','package'),('version',VERSION),('client','site')]: ET.SubElement(u,key).text=value
 ET.SubElement(u,'infourl',{'title':'ToPowerYou'}).text='https://topoweryou.com'
 d=ET.SubElement(u,'downloads')
 ET.SubElement(d,'downloadurl',{'type':'full','format':'zip'}).text=f'https://shop.topoweryou.com/index.php?option=com_vmupdatekeymanager&task=download.get&file={name}&channel=update'

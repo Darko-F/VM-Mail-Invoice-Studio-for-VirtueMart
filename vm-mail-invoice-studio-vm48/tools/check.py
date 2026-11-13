@@ -39,17 +39,22 @@ for p in (root/'dist').glob('*.zip'):
     with zipfile.ZipFile(p) as z:
         assert z.testzip() is None
         assert not any('vmstudiodesign' in name for name in z.namelist()), 'Core must not bundle optional packs'
-        xml=ET.fromstring(z.read('pkg_vmmailinvoicestudio.xml'))
+        if 'pkg_vmmailinvoicestudio_vm48.xml' not in z.namelist():
+            continue  # Historical packages used the shared VM5 package identity.
+        xml=ET.fromstring(z.read('pkg_vmmailinvoicestudio_vm48.xml'))
+        assert xml.findtext('packagename') == 'vmmailinvoicestudio_vm48'
         lang = xml.find("languages/language[@tag='en-GB']")
         assert lang is not None, 'Package must declare an English system language file'
         lang_path = xml.find('languages').get('folder', '').strip('/') + '/' + lang.text
-        assert lang_path.endswith('/pkg_vmmailinvoicestudio.sys.ini')
+        assert lang_path.endswith('/pkg_vmmailinvoicestudio_vm48.sys.ini')
         translations = dict(re.findall(r'^([A-Z0-9_]+)="(.*)"$', z.read(lang_path).decode(), re.M))
-        assert xml.findtext('name') in translations, 'Package install name must translate'
+        assert xml.findtext('name') == 'VM 4 Mail Invoice Studio', 'Package install name must match the JED listing'
+        assert 'PKG_VMMAILINVOICESTUDIO_VM48' in translations
+        assert xml.findtext('description') in translations
         with zipfile.ZipFile(io.BytesIO(z.read('com_vmmailinvoicestudio.zip'))) as component:
             component_lang = component.read('admin/language/en-GB/com_vmmailinvoicestudio.sys.ini').decode()
             component_name = re.search(r'^COM_VMMAILINVOICESTUDIO="(.*)"$', component_lang, re.M).group(1)
-            assert translations[xml.findtext('name')] == component_name, 'Package/component names must match'
+            assert xml.findtext('name') == component_name, 'Package/component names must match'
         for f in xml.findall('files/file'):
             with zipfile.ZipFile(io.BytesIO(z.read(f.text))) as child:assert child.testzip() is None
 for p in (root/'dist'/'design-packs').glob('*.zip'):

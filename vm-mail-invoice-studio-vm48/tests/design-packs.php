@@ -114,9 +114,10 @@ namespace {
     check($catalog->all()['alpha.classic']['provider'] === 'alpha', 'Duplicate registration leaves existing provider intact');
 
     $invalidPacks = [
+        designPack(['test'=>definition(['content_renderer'=>'missing_function'])]),
         designPack(['test'=>definition()], ['api'=>'1']),
         designPack(['test'=>definition()], ['api'=>2]),
-        designPack(['test'=>definition()], ['min_core'=>'1.0.1']),
+        designPack(['test'=>definition()], ['min_core'=>'1.0.2']),
         designPack(['test'=>definition()], ['min_core'=>'anything']),
         designPack(['test'=>definition()], ['name'=>'']),
         designPack([]),
@@ -229,6 +230,16 @@ namespace {
     }
     check($received[0]['api'] === 1 && $received[0]['design_id'] === 'custom.ribbon', 'Renderer receives API and resolved design ID');
     check($received[0]['pdf'] === false && $received[2]['pdf'] === true, 'Renderer receives correct PDF mode');
+
+    foreach (['empty'=>static fn() => '', 'throws'=>static function () { throw new \RuntimeException('Failure'); },
+        'prints'=>static function ($context) { echo 'unexpected'; return $context['body_html']; }] as $id=>$transform) {
+        $catalog->register('content' . $id, designPack(['test'=>definition([
+            'content_renderer'=>$transform, 'renderers'=>['email'=>$renderer, 'invoice'=>$renderer],
+        ])]));
+        foreach (['email','invoice'] as $kind) {
+            check(frame($native,$kind,'content'.$id.'.test') === frame($native,$kind,DesignCatalog::fallback($kind)), 'Content renderer failure safely restores native body: '.$id.' '.$kind);
+        }
+    }
 
     // Failed Modern renderers must restart from the original body, otherwise Classic would lose fields/history.
     $context = ['omit'=>['Order date', 'Order status'], 'name'=>'Name', 'address'=>'Address',
