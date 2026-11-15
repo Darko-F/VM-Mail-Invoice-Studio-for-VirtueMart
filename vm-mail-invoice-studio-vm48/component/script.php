@@ -12,6 +12,38 @@ use Joomla\Database\DatabaseInterface;
 
 final class Com_VmmailinvoicestudioInstallerScript
 {
+    public function postflight(string $type, $parent): void
+    {
+        if ($type === 'uninstall') {
+            return;
+        }
+        // Remove update associations only for our two template plugins.
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $query = $db->getQuery(true)->select($db->quoteName('extension_id'))->from($db->quoteName('#__extensions'))
+            ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
+            ->where($db->quoteName('folder') . ' = ' . $db->quote('vmstudiodesign'))
+            ->where($db->quoteName('element') . ' IN (' . $db->quote('studioexample') . ',' . $db->quote('studioinvoicecollection') . ')');
+        foreach ($db->setQuery($query)->loadColumn() as $extensionId) {
+            $extensionId = (int) $extensionId;
+            $query = $db->getQuery(true)->select($db->quoteName('update_site_id'))->from($db->quoteName('#__update_sites_extensions'))
+                ->where($db->quoteName('extension_id') . ' = ' . $extensionId);
+            $sites = $db->setQuery($query)->loadColumn();
+            foreach (['#__update_sites_extensions', '#__updates'] as $table) {
+                $db->setQuery($db->getQuery(true)->delete($db->quoteName($table))
+                    ->where($db->quoteName('extension_id') . ' = ' . $extensionId))->execute();
+            }
+            foreach ($sites as $siteId) {
+                $siteId = (int) $siteId;
+                $query = $db->getQuery(true)->select('COUNT(*)')->from($db->quoteName('#__update_sites_extensions'))
+                    ->where($db->quoteName('update_site_id') . ' = ' . $siteId);
+                if (!(int) $db->setQuery($query)->loadResult()) {
+                    $db->setQuery($db->getQuery(true)->delete($db->quoteName('#__update_sites'))
+                        ->where($db->quoteName('update_site_id') . ' = ' . $siteId))->execute();
+                }
+            }
+        }
+    }
+
     public function preflight(string $type, $parent): bool
     {
         if ($type === 'uninstall') {

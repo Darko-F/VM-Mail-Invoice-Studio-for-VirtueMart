@@ -17,7 +17,7 @@ use ToPowerYou\Component\Vmmailinvoicestudio\Administrator\Contract\DesignPackIn
 
 final class DesignCatalog
 {
-    public const CORE_VERSION = '1.0.1';
+    public const CORE_VERSION = '1.0.2';
     public const CONTENT_TOKEN = '{{vmstudio_content}}';
     private static ?self $instance = null;
     private array $designs = [];

@@ -22,6 +22,12 @@ for folder in folders:
         assert xml.find('updateservers/server').text.startswith('https://shop.topoweryou.com/')
     else:
         assert xml.attrib['group'] == 'vmstudiodesign'
+        assert xml.find('updateservers') is None, 'Paid packs use the announcement catalogue'
+        if folder.endswith('/studioinvoicecollection'):
+            assert xml.findtext('name') == 'VMStudioDesign - Mail Invoice TP 1', 'Pack install and JED names must match'
+            assert xml.findtext('name').startswith('VMStudioDesign - '), 'Plugin display name must start with its group prefix'
+            assert not re.search(r'\b(?:plugin|module|template|v\d+(?:\.\d+)+)\b', xml.findtext('name'), re.I), 'No reserved type words or release version in name'
+            assert xml.findtext('version') == '1.0'
     for node in xml.findall('.//files')+[xml.find('media')]:
         if node is None: continue
         base=root/folder/node.attrib.get('folder','')

@@ -18,7 +18,4 @@
         <filename>LICENSE.txt</filename>
     </files>
     <dlid prefix="key=" suffix=""/>
-    <updateservers>
-        <server type="extension" priority="1" name="VM Studio Design - Editorial Updates">https://shop.topoweryou.com/files/updatesxml/studioexample.xml</server>
-    </updateservers>
 </extension>

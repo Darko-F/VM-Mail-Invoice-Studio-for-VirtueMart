@@ -40,6 +40,18 @@ namespace {
             foreach (['Example product','100.00 EUR','22.00 EUR','122.00 EUR','SAMPLE ONLY'] as $value) {
                 check(str_contains($html,$value), 'Sample data preserved: '.$value);
             }
+            if ($id==='minimal') {
+                $dom = new \DOMDocument();
+                @$dom->loadHTML('<?xml encoding="UTF-8">' . $html);
+                $xpath = new \DOMXPath($dom);
+                $heading = $xpath->query('//h1')->item(0);
+                check($heading && $heading->getAttribute('align') === 'right', 'Reference: compact right-aligned document title');
+                check($xpath->query('//table[@class="collection-minimal-brand"]//td[@align="left"]')->length === 1, 'Reference: brand remains left aligned');
+                check($xpath->query('//table[@class="collection-summary"]/tr/td[@width="55%"]')->length === 1, 'Reference: spacer right-aligns totals in TCPDF');
+                check($xpath->query('//table[@class="collection-summary"]/tr/td[@width="45%"]/table[@class="collection-totals"]')->length === 1, 'Reference: narrow totals block');
+                check(str_contains($html, 'border-bottom:0.5pt solid #e6e6e6'), 'Reference: fine grey item row rules');
+                check(str_contains($html, 'color:#737373'), 'Reference: muted item and summary typography');
+            }
             if ($id==='blue') {
                 check(str_contains($html,'bgcolor="#124780"'),'Blue heading is inline for PDF and email');
             }

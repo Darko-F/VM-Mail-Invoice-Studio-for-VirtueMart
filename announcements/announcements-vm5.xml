@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<announcements edition="vm5">
+  <pack id="template-pack-v1-vm5">
+    <name>VMStudioDesign - Mail Invoice TP 1</name>
+    <description>Four matching email and invoice designs: Monochrome Professional, Blue Professional, Minimal Signature, and Pink &amp; Teal. Requires the matching VM Mail &amp; Invoice Studio core 1.0.1 or later. Edition requirements: Joomla 6, PHP 8.3+, VirtueMart 5.</description>
+    <url>https://shop.topoweryou.com/</url>
+    <version>1.0</version>
+    <filename>plg_vmmailinvoicestudio_template_pack_v1.0.zip</filename>
+    <element>studioinvoicecollection</element>
+    <min_core>1.0.1</min_core>
+  </pack>
+</announcements>

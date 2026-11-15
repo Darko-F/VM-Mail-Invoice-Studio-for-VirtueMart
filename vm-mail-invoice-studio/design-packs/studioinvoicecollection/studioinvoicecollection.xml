@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="plugin" group="vmstudiodesign" method="upgrade">
-    <name>VM Studio Design - Invoice Collection</name>
+    <name>VMStudioDesign - Mail Invoice TP 1</name>
     <author>Darko Fatur / ToPowerYou</author>
     <creationDate>2026-11</creationDate>
     <copyright>Copyright (C) 2026 Darko Fatur / ToPowerYou</copyright>
     <license>GNU General Public License version 2 or later</license>
     <authorEmail>info@topoweryou.com</authorEmail>
     <authorUrl>https://topoweryou.com</authorUrl>
-    <version>1.2.0</version>
+    <version>1.0</version>
     <description>PLG_VMSTUDIODESIGN_STUDIOINVOICECOLLECTION_DESCRIPTION</description>
     <namespace path="src">ToPowerYou\Plugin\Vmstudiodesign\Studioinvoicecollection</namespace>
     <scriptfile>script.php</scriptfile>
@@ -18,4 +18,5 @@
         <folder>language</folder>
         <filename>LICENSE.txt</filename>
     </files>
+    <dlid prefix="key=" suffix=""/>
 </extension>

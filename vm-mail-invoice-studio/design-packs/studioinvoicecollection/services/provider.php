@@ -1,6 +1,6 @@
 <?php
 /**
- * @package VM Mail & Invoice Studio - Invoice Collection
+ * @package VMStudioDesign - Mail Invoice TP 1
  * @copyright Copyright (C) 2026 Darko Fatur / ToPowerYou
  * @license GNU General Public License version 2 or later; see LICENSE.txt
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * @package VM Mail & Invoice Studio - Invoice Collection
+ * @package VMStudioDesign - Mail Invoice TP 1
  * @copyright Copyright (C) 2026 Darko Fatur / ToPowerYou
  * @license GNU General Public License version 2 or later; see LICENSE.txt
  */
@@ -12,6 +12,38 @@ use ToPowerYou\Component\Vmmailinvoicestudio\Administrator\Contract\DesignPackIn
 
 final class PlgVmstudiodesignStudioinvoicecollectionInstallerScript
 {
+    public function postflight(string $type, $parent): void
+    {
+        if ($type === 'uninstall') {
+            return;
+        }
+        // Remove update associations only for our two template plugins.
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $query = $db->getQuery(true)->select($db->quoteName('extension_id'))->from($db->quoteName('#__extensions'))
+            ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
+            ->where($db->quoteName('folder') . ' = ' . $db->quote('vmstudiodesign'))
+            ->where($db->quoteName('element') . ' IN (' . $db->quote('studioexample') . ',' . $db->quote('studioinvoicecollection') . ')');
+        foreach ($db->setQuery($query)->loadColumn() as $extensionId) {
+            $extensionId = (int) $extensionId;
+            $query = $db->getQuery(true)->select($db->quoteName('update_site_id'))->from($db->quoteName('#__update_sites_extensions'))
+                ->where($db->quoteName('extension_id') . ' = ' . $extensionId);
+            $sites = $db->setQuery($query)->loadColumn();
+            foreach (['#__update_sites_extensions', '#__updates'] as $table) {
+                $db->setQuery($db->getQuery(true)->delete($db->quoteName($table))
+                    ->where($db->quoteName('extension_id') . ' = ' . $extensionId))->execute();
+            }
+            foreach ($sites as $siteId) {
+                $siteId = (int) $siteId;
+                $query = $db->getQuery(true)->select('COUNT(*)')->from($db->quoteName('#__update_sites_extensions'))
+                    ->where($db->quoteName('update_site_id') . ' = ' . $siteId);
+                if (!(int) $db->setQuery($query)->loadResult()) {
+                    $db->setQuery($db->getQuery(true)->delete($db->quoteName('#__update_sites'))
+                        ->where($db->quoteName('update_site_id') . ' = ' . $siteId))->execute();
+                }
+            }
+        }
+    }
+
     public function preflight(string $type, $parent): bool
     {
         if ($type === 'uninstall') {
@@ -20,7 +52,7 @@ final class PlgVmstudiodesignStudioinvoicecollectionInstallerScript
         if (version_compare(PHP_VERSION, '8.3.0', '<')
             || !defined('JVERSION') || version_compare(JVERSION, '6.0.0', '<')
             || version_compare(JVERSION, '7.0.0', '>=')) {
-            return $this->fail('Studio Invoice Collection requires Joomla 6 and PHP 8.3 or later.');
+            return $this->fail('VMStudioDesign - Mail Invoice TP 1 requires Joomla 6 and PHP 8.3 or later.');
         }
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $query = $db->getQuery(true)->select($db->quoteName('extension_id'))
@@ -29,7 +61,7 @@ final class PlgVmstudiodesignStudioinvoicecollectionInstallerScript
             ->where($db->quoteName('element') . ' = ' . $db->quote('com_vmmailinvoicestudio'));
         $contract = JPATH_ADMINISTRATOR . '/components/com_vmmailinvoicestudio/src/Contract/DesignPackInterface.php';
         if (!$db->setQuery($query)->loadResult() || !is_file($contract)) {
-            return $this->fail('Install VM Mail & Invoice Studio 1.0.0 with design-pack support before installing this pack.');
+            return $this->fail('Install VM Mail & Invoice Studio 1.0.1 with design-pack support before installing this pack.');
         }
         require_once $contract;
         if (!interface_exists(DesignPackInterface::class, false)

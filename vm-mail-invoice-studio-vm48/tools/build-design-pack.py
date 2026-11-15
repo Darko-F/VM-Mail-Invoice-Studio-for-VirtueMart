@@ -41,8 +41,8 @@ def collect(source):
     if xml.tag != 'extension' or xml.get('type') != 'plugin' or xml.get('group') != 'vmstudiodesign':
         raise ValueError('Expected a vmstudiodesign plugin manifest.')
     version = (xml.findtext('version') or '').strip()
-    if not re.fullmatch(r'\d+\.\d+\.\d+', version):
-        raise ValueError('The version must use three numeric components.')
+    if not re.fullmatch(r'\d+\.\d+(?:\.\d+)?', version):
+        raise ValueError('The version must use two or three numeric components.')
     elements = [entry.get('plugin') for entry in xml.findall('./files/*') if entry.get('plugin')]
     if len(elements) != 1 or not re.fullmatch(r'[a-z][a-z0-9_]*', elements[0]):
         raise ValueError('The manifest must declare exactly one valid plugin element.')
@@ -119,39 +119,15 @@ def main():
         data = archive(files)
     except (ValueError, OSError, ET.ParseError) as error:
         parser.error(str(error))
-    name = f'plg_vmstudiodesign_{element}_vm48_v{version}.zip'
+    # Derive the distribution filename from the manifest release version.
+    name = (f'plg_vmmailinvoicestudio_vm48_template_pack_v{version}.zip'
+            if element == 'studioinvoicecollection'
+            else f'plg_vmstudiodesign_{element}_vm48_v{version}.zip')
     destination = ROOT / 'dist' / 'design-packs'
     destination.mkdir(parents=True, exist_ok=True)
     (destination / name).write_bytes(data)
     digest = hashlib.sha256(data).hexdigest()
     (destination / (name + '.sha256')).write_text(f'{digest}  {name}\n')
-    manifest = ET.fromstring(files[element + '.xml'])
-    server = manifest.find('./updateservers/server')
-    if server is not None and server.text:
-        updates = ET.Element('updates')
-        update = ET.SubElement(updates, 'update')
-        for tag, value in (
-            ('name', manifest.findtext('name')),
-            ('description', 'Editorial email and invoice design for VM Mail & Invoice Studio'),
-            ('element', element), ('type', 'plugin'), ('folder', 'vmstudiodesign'),
-            ('version', version),
-        ):
-            ET.SubElement(update, tag).text = value
-        ET.SubElement(update, 'infourl', title='ToPowerYou').text = 'https://topoweryou.com'
-        downloads = ET.SubElement(update, 'downloads')
-        ET.SubElement(downloads, 'downloadurl', type='full', format='zip').text = (
-            'https://shop.topoweryou.com/index.php?option=com_vmupdatekeymanager'
-            '&task=download.get&file=' + name + '&channel=update'
-        )
-        ET.SubElement(update, 'dlid', prefix='key=', suffix='')
-        ET.SubElement(ET.SubElement(update, 'tags'), 'tag').text = 'stable'
-        ET.SubElement(update, 'targetplatform', name='joomla', version=r'5\.[0-9]+')
-        ET.SubElement(update, 'php_minimum').text = '8.1.0'
-        ET.SubElement(update, 'sha256').text = digest
-        ET.indent(updates, space='  ')
-        feed_path = destination / server.text.strip().rsplit('/', 1)[-1]
-        ET.ElementTree(updates).write(feed_path, encoding='utf-8', xml_declaration=True)
-        print(f'Generated update feed: {feed_path} (publish before distribution)')
     print(f'Built {name} ({len(data):,} bytes)\nSHA-256 {digest}')
 
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * @package VM Mail & Invoice Studio - Invoice Collection
+ * @package VMStudioDesign - Mail Invoice TP 1
  * @copyright Copyright (C) 2026 Darko Fatur / ToPowerYou
  * @license GNU General Public License version 2 or later; see LICENSE.txt
  */
@@ -31,7 +31,7 @@ final class Studioinvoicecollection extends CMSPlugin implements DesignPackInter
                 'renderers' => ['invoice' => [$this, 'invoice'], 'email' => [$this, 'email']],
             ];
         }
-        return ['api' => 1, 'min_core' => '1.0.1', 'name' => 'Invoice & Email Collection', 'designs' => $designs];
+        return ['api' => 1, 'min_core' => '1.0.1', 'name' => 'VMStudioDesign - Mail Invoice TP 1', 'designs' => $designs];
     }
 
     /** Style native document fragments without rebuilding prices or dropping fields. */
@@ -74,14 +74,14 @@ final class Studioinvoicecollection extends CMSPlugin implements DesignPackInter
                         }
                     }
                     $cell->removeAttribute('bgcolor');
-                    $style = implode(';', $kept) . ';font-size:' . ($header ? '8' : '9') . 'pt;color:#333333;';
+                    $style = implode(';', $kept) . ';font-size:' . ($header ? '8' : '9') . 'pt;color:' . ($id === 'minimal' && $items && !$header ? '#737373' : '#333333') . ';';
                     if ($items) {
-                        $style .= $id === 'pink-teal' ? 'border:0.5pt solid #999999;' : 'border-bottom:0.5pt solid ' . ($id === 'minimal' ? '#ffffff' : '#e3e3e3') . ';';
+                        $style .= $id === 'pink-teal' ? 'border:0.5pt solid #999999;' : 'border-bottom:0.5pt solid ' . ($id === 'minimal' ? '#e6e6e6' : '#e3e3e3') . ';';
                         if ($header) {
                             $bg = $id === 'blue' ? '#124780' : ($id === 'pink-teal' ? '#eeeeee' : '#ffffff');
                             $fg = $id === 'blue' ? '#ffffff' : '#222222';
                             $cell->setAttribute('bgcolor', $bg);
-                            $style .= 'background-color:' . $bg . ';color:' . $fg . ';font-weight:bold;border-bottom:0.7pt solid #888888;';
+                            $style .= 'background-color:' . $bg . ';color:' . $fg . ';font-weight:bold;' . ($id === 'minimal' ? 'border-top:0.5pt solid #cccccc;border-bottom:0.5pt solid #dddddd;' : 'border-bottom:0.7pt solid #888888;');
                         }
                     } else {
                         $style .= 'background-color:#ffffff;';
@@ -105,25 +105,49 @@ final class Studioinvoicecollection extends CMSPlugin implements DesignPackInter
                 if ($tail && !$xpath->query('.//*[@rowspan]', $table)->length) {
                     $totals = $document->createElement('table');
                     foreach (['class'=>'collection-totals','width'=>'100%','cellspacing'=>'0','cellpadding'=>'5','border'=>'0'] as $key=>$value) { $totals->setAttribute($key,$value); }
-                    foreach ($tail as $row) {
+                    if ($id === 'minimal') {
+                        $totals->setAttribute('width', '100%');
+                        $totals->setAttribute('align', 'right');
+                        $totals->setAttribute('style', 'border-collapse:collapse;');
+                    }
+                    foreach ($tail as $rowIndex => $row) {
                         $cells = $xpath->query('./td | ./th', $row);
                         foreach ($cells as $index=>$cell) {
                             $width = $cells->length === 1 ? 100 : ($index === 0 ? 60 : 40 / ($cells->length-1));
                             $cell->removeAttribute('colspan');
                             $cell->setAttribute('width', (string)$width . '%');
                             $cell->setAttribute('align','right');
-                            $cell->setAttribute('style','font-size:9pt;color:#333333;text-align:right;');
+                            $cell->setAttribute('style', $id === 'minimal'
+                                ? 'font-size:8pt;color:#737373;text-align:' . ($index === 0 ? 'left' : 'right') . ';border-bottom:0.5pt solid #eeeeee;' . ($rowIndex === 0 ? 'border-top:0.7pt solid #cccccc;' : '')
+                                : 'font-size:9pt;color:#333333;text-align:right;');
+                            if ($id === 'minimal' && $index === 0) { $cell->setAttribute('align', 'left'); }
                         }
                         $totals->appendChild($row);
                     }
-                    $table->parentNode->insertBefore($totals,$table->nextSibling);
-                    $table->parentNode->insertBefore($document->createElement('br'),$totals);
+                    $summary = $totals;
+                    if ($id === 'minimal') {
+                        // TCPDF ignores table float/alignment: use a 55% spacer,
+                        // wrapping only totals so the item table still paginates.
+                        $summary = $document->createElement('table');
+                        foreach (['class'=>'collection-summary', 'width'=>'100%', 'cellpadding'=>'0', 'cellspacing'=>'0', 'border'=>'0'] as $key=>$value) { $summary->setAttribute($key, $value); }
+                        $summaryRow = $summary->appendChild($document->createElement('tr'));
+                        $spacer = $summaryRow->appendChild($document->createElement('td'));
+                        $spacer->setAttribute('width', '55%');
+                        $summaryCell = $summaryRow->appendChild($document->createElement('td'));
+                        $summaryCell->setAttribute('width', '45%');
+                        $summaryCell->appendChild($totals);
+                    }
+                    $table->parentNode->insertBefore($summary,$table->nextSibling);
+                    $table->parentNode->insertBefore($document->createElement('br'),$summary);
                 }
             }
         }
         // Native h1 and paragraph styles must not override the pack typography.
         foreach ($xpath->query('//h1') as $heading) {
-            $heading->setAttribute('style', 'font-family:Arial,Helvetica,sans-serif;font-size:22pt;font-weight:bold;color:' . ($id === 'blue' ? '#124780' : '#333333') . ';');
+            $heading->setAttribute('style', $id === 'minimal'
+                ? 'font-family:Arial,Helvetica,sans-serif;font-size:11pt;font-weight:bold;color:#111111;text-align:right;'
+                : 'font-family:Arial,Helvetica,sans-serif;font-size:22pt;font-weight:bold;color:' . ($id === 'blue' ? '#124780' : '#333333') . ';');
+            if ($id === 'minimal') { $heading->setAttribute('align', 'right'); }
         }
         $html = '';
         foreach ($document->getElementsByTagName('body')->item(0)->childNodes as $child) {
@@ -155,8 +179,17 @@ final class Studioinvoicecollection extends CMSPlugin implements DesignPackInter
         $ink = $blue ? '#124780' : '#333333';
         $head = $blue ? '#124780' : ($id === 'pink-teal' ? '#eeeeee' : '#ffffff');
         $fg = $blue ? '#ffffff' : '#222222';
-        $rule = $id === 'minimal' ? '#ffffff' : '#e3e3e3';
+        $rule = $id === 'minimal' ? '#e6e6e6' : '#e3e3e3';
         $grid = $id === 'pink-teal' ? 'border:0.5pt solid #999999;' : 'border-bottom:0.5pt solid ' . $rule . ';';
+        if ($id === 'minimal') {
+            return 'h1{font-family:helvetica,Arial,sans-serif;font-size:11pt;font-weight:bold;color:#111111;text-align:right;}'
+                . 'p{font-size:9pt;line-height:1.45;color:#333333;}table{border-collapse:collapse;}'
+                . 'table.collection-items td{font-size:9pt;color:#737373;border-bottom:0.5pt solid #e6e6e6;}'
+                . 'table.collection-items th,table.collection-items tr.sectiontableheader td{font-size:8pt;font-weight:bold;color:#111111;background-color:#ffffff;border-top:0.5pt solid #cccccc;border-bottom:0.5pt solid #dddddd;}'
+                . 'table.collection-totals{width:100%;}table.collection-totals td{font-size:8pt;border-bottom:0.5pt solid #eeeeee;}'
+                . 'table.collection-totals strong,table.collection-totals b{color:#111111;}'
+                . 'table.collection-details td{font-size:8pt;}';
+        }
         return 'h1{font-family:helvetica,Arial,sans-serif;font-size:22pt;font-weight:bold;color:' . $ink . ';}'
             . 'p{line-height:1.5;}table{border-collapse:collapse;}'
             . 'table.collection-items td{font-size:9pt;padding:6px;' . $grid . '}'
@@ -178,7 +211,11 @@ final class Studioinvoicecollection extends CMSPlugin implements DesignPackInter
             return $this->image('pink-top', $pdf, $width) . '<br />'
                 . '<table width="100%" cellpadding="10"><tr><td style="color:#444444;font-size:18pt;font-weight:bold">' . $heading . '</td></tr></table>';
         }
-        $align = $id === 'minimal' ? 'right' : 'left';
+        if ($id === 'minimal') {
+            return '<table class="collection-minimal-brand" width="100%" cellspacing="0" cellpadding="10"><tr><td align="left" style="font-size:12pt;font-weight:normal;color:#111111">'
+                . $heading . '</td></tr></table><br />';
+        }
+        $align = 'left';
         return '<table width="100%" cellpadding="10"><tr><td align="' . $align
             . '" style="font-size:' . ($id === 'minimal' ? '16' : '12') . 'pt;color:#333333">'
             . $heading . '</td></tr></table><br /><br />';
@@ -200,7 +237,7 @@ final class Studioinvoicecollection extends CMSPlugin implements DesignPackInter
             . '<style>' . $this->css($id) . '@media(max-width:640px){.studio-content{padding:20px!important;}}</style></head>'
             . '<body style="margin:0;padding:24px 8px;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#333333">'
             . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center">'
-            . '<table role="presentation" width="640" cellspacing="0" cellpadding="0" style="width:100%;max-width:640px;background:#ffffff;border:1px solid #e5e5e5">'
+            . '<table role="presentation" width="640" cellspacing="0" cellpadding="0" style="width:100%;max-width:640px;background:#ffffff;' . ($id === 'minimal' ? 'border:0;' : 'border:1px solid #e5e5e5;') . '">'
             . '<tr><td>' . $this->header($context, 640) . '</td></tr>'
             . '<tr><td class="studio-content" style="padding:24px 36px 48px;font-size:14px;line-height:1.6">'
             . $context['content_token'] . '</td></tr>'

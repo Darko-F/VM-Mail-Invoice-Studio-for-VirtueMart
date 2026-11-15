@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "packs": [
+    {
+      "edition": "vm5",
+      "element": "studioinvoicecollection",
+      "name": "VMStudioDesign - Mail Invoice TP 1",
+      "description": "Four matching email and invoice designs: Monochrome Professional, Blue Professional, Minimal Signature, and Pink & Teal.",
+      "version": "1.0",
+      "min_core": "1.0.1",
+      "url": "https://shop.topoweryou.com/joomla-extensions/vm-5-mis-template-pack-1"
+    },
+    {
+      "edition": "vm4",
+      "element": "studioinvoicecollection",
+      "name": "VMStudioDesign - Mail Invoice TP 1",
+      "description": "Four matching email and invoice designs: Monochrome Professional, Blue Professional, Minimal Signature, and Pink & Teal.",
+      "version": "1.0",
+      "min_core": "1.0.1",
+      "url": "https://shop.topoweryou.com/joomla-extensions/vm-4-mis-template-pack-1"
+    }
+  ]
+}

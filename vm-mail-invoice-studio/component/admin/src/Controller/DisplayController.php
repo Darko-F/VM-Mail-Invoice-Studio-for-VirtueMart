@@ -50,6 +50,10 @@ final class DisplayController extends BaseController
         if ($this->app->getIdentity()->authorise('core.admin', 'com_vmmailinvoicestudio')) {
             ToolbarHelper::preferences('com_vmmailinvoicestudio');
         }
+        $newsEnabled = (bool) ComponentHelper::getParams('com_vmmailinvoicestudio')->get('announcements_enabled', 1);
+        $announcementContent = \ToPowerYou\Component\Vmmailinvoicestudio\Administrator\Service\Announcements::content();
+        $announcements = $announcementContent['packs'];
+        $announcementBanner = $announcementContent['banner'];
         $settings = Design::settings();
         $form = Form::getInstance('com_vmmailinvoicestudio.design', JPATH_COMPONENT_ADMINISTRATOR . '/forms/design.xml', ['control'=>'jform']);
         // Core designs are always listed; enabled packs add designs for each supported document type.
@@ -81,6 +85,18 @@ final class DisplayController extends BaseController
         $wa->registerAndUseScript('vmstudio', 'media/com_vmmailinvoicestudio/studio.js', ['version'=>'auto'], ['defer'=>true]);
         include JPATH_COMPONENT_ADMINISTRATOR . '/tmpl/studio.php';
         return $this;
+    }
+
+    public function refreshNews(): void
+    {
+        $this->mutation();
+        try {
+            \ToPowerYou\Component\Vmmailinvoicestudio\Administrator\Service\Announcements::clearCache();
+            $this->app->enqueueMessage(Text::_('COM_VMMAILINVOICESTUDIO_NEWS_REFRESHED'));
+        } catch (\Throwable $error) {
+            $this->app->enqueueMessage(Text::_('COM_VMMAILINVOICESTUDIO_NEWS_REFRESH_FAILED'), 'warning');
+        }
+        $this->setRedirect(Route::_('index.php?option=com_vmmailinvoicestudio', false));
     }
 
     public function save(): void

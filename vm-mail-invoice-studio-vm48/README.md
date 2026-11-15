@@ -37,3 +37,8 @@ Install core 1.0.1 before collection pack 1.2.0. Both updates are required for c
 Run `python3 tools/build.py` from this edition directory. Run `python3 tools/check.py` with PHP CLI available. Generated installers and feeds are written to `dist/` and are not committed. Supporting validation documents referenced above are maintained outside this source repository.
 
 The package manifest uses a readable install name. The update feed uses `<client>site</client>` and targets only this edition’s Joomla major version. Key Manager currently regenerates display names from the configured package prefix and hardcodes Joomla 5/6 compatibility; publishing through it requires checking the resulting feed.
+
+
+## Core 1.0.2: add-on notices
+
+Add-ons & News reads banner content and embedded JSON from one public Joomla article, with installed-version comparison and manual shop downloads. See `../announcements/README.md` and `../article.html` for publishing instructions. Template packs no longer register Joomla update sites.
